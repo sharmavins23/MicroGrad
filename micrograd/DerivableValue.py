@@ -1,11 +1,12 @@
 import math
+import random
 
 
 # Definition class for a derivable value
 class DerivableValue:
     def __init__(self, data, children=()):
         # We only accept numbers as data
-        assert isinstance(data, (int, float)), "Data must be a number!"
+        assert isinstance(data, (int, float)), f"Data {data} must be a number!"
         self.data = data
 
         # Default any and all gradients to 0.0
@@ -15,7 +16,7 @@ class DerivableValue:
         self._updatePartialDerivative = lambda: None
 
         # Keep track of any children
-        self._children = _children
+        self._children = children
 
     # ===== Core mathematical functions (with derivatives) =====================
 
@@ -26,7 +27,7 @@ class DerivableValue:
             other, DerivableValue) else DerivableValue(other)
 
         # Create a new value with the sum of the data
-        out = Value(self.data + other.data, (self, other))
+        out = DerivableValue(self.data + other.data, (self, other))
 
         def _updatePartialDerivative():
             # Partial derivative of addition is 1 in both cases
@@ -43,7 +44,7 @@ class DerivableValue:
             other, DerivableValue) else DerivableValue(other)
 
         # Create a new value with the product of the data
-        out = Value(self.data * other.data, (self, other))
+        out = DerivableValue(self.data * other.data, (self, other))
 
         def _updatePartialDerivative():
             # Partial derivative of multiplication is the other value
@@ -56,7 +57,7 @@ class DerivableValue:
     # Compute the exponential e^x of a value
     def exp(self):
         # Create a new value with the exponential of the data
-        out = Value(math.exp(self.data), (self,))
+        out = DerivableValue(math.exp(self.data), (self,))
 
         def _updatePartialDerivative():
             # Partial derivative of exponential is the exponential
@@ -72,15 +73,18 @@ class DerivableValue:
             other, DerivableValue) else DerivableValue(other)
 
         # Create a new value with the power of the data
-        out = Value(self.data**other.data, (self, other))
+        out = DerivableValue(self.data**other.data, (self, other))
 
         def _updatePartialDerivative():
             # Partial derivative for x^n = n * x^(n-1)
             self.grad += other.data * \
                 (self.data ** (other.data - 1.0)) * out.grad
-            # Partial derivative for n^x = n^x * ln(n)
-            other.grad += (self.data ** other.data) * \
-                math.log(self.data) * out.grad
+            # Partial derivative for a^x = a^x * ln(a)
+            if (self.data > 0.0):
+                other.grad += (self.data ** other.data) * \
+                    math.log(self.data) * out.grad
+            else:
+                other.grad += 0.0 * out.grad
         out._updatePartialDerivative = _updatePartialDerivative
 
         return out
@@ -89,7 +93,7 @@ class DerivableValue:
 
     # Identity activation
     def identity(self):
-        out = Value(self.data, (self,))
+        out = DerivableValue(self.data, (self,))
 
         def _updatePartialDerivative():
             self.grad += 1.0 * out.grad
@@ -99,7 +103,7 @@ class DerivableValue:
 
     # Binary step activation
     def heaviside(self):
-        out = Value(0.0 if self.data < 0.0 else 1.0, (self,))
+        out = DerivableValue(0.0 if self.data < 0.0 else 1.0, (self,))
 
         def _updatePartialDerivative():
             self.grad += 0.0 * out.grad
@@ -109,7 +113,7 @@ class DerivableValue:
 
     # Logistic activation
     def sigmoid(self):
-        out = Value(1.0 / (1.0 + math.exp(-self.data)), (self,))
+        out = DerivableValue(1.0 / (1.0 + math.exp(-self.data)), (self,))
 
         def _updatePartialDerivative():
             self.grad += (out.data * (1.0 - out.data)) * out.grad
@@ -119,7 +123,7 @@ class DerivableValue:
 
     # Hyperbolic tangent activation
     def tanh(self):
-        out = Value(math.tanh(self.data), (self,))
+        out = DerivableValue(math.tanh(self.data), (self,))
 
         def _updatePartialDerivative():
             self.grad += (1.0 - (out.data ** 2.0)) * out.grad
@@ -129,7 +133,7 @@ class DerivableValue:
 
     # Rectified linear unit activation
     def relu(self):
-        out = Value(max(0.0, self.data), (self,))
+        out = DerivableValue(max(0.0, self.data), (self,))
 
         def _updatePartialDerivative():
             self.grad += (1.0 if self.data > 0.0 else 0.0) * out.grad
@@ -139,8 +143,8 @@ class DerivableValue:
 
     # Gaussian error linear unit activation
     def gelu(self):
-        out = Value(0.5 * self.data *
-                    (1.0 + math.erf(self.data / math.sqrt(2.0))), (self,))
+        out = DerivableValue(0.5 * self.data *
+                             (1.0 + math.erf(self.data / math.sqrt(2.0))), (self,))
 
         def _updatePartialDerivative():
             self.grad += (0.5 * (1.0 + math.erf(self.data / math.sqrt(2.0))) +
@@ -151,7 +155,7 @@ class DerivableValue:
 
     # Softplus activation
     def softplus(self):
-        out = Value(math.log(1.0 + math.exp(self.data)), (self,))
+        out = DerivableValue(math.log(1.0 + math.exp(self.data)), (self,))
 
         def _updatePartialDerivative():
             self.grad += (1.0 / (1.0 + math.exp(-self.data))) * out.grad
@@ -161,8 +165,8 @@ class DerivableValue:
 
     # Scaled exponential linear unit activation
     def selu(self):
-        out = Value(1.0507 * self.data *
-                    (1.0 if self.data > 0.0 else 1.67326 * math.exp(self.data) - 1.67326), (self,))
+        out = DerivableValue(1.0507 * self.data *
+                             (1.0 if self.data > 0.0 else 1.67326 * math.exp(self.data) - 1.67326), (self,))
 
         def _updatePartialDerivative():
             self.grad += (1.0507 * (1.0 if self.data > 0.0 else 1.67326 *
@@ -171,9 +175,19 @@ class DerivableValue:
 
         return out
 
+    # Leaky rectified linear unit activation
+    def leakyRelu(self, alpha=0.01):
+        out = DerivableValue(max(alpha * self.data, self.data), (self,))
+
+        def _updatePartialDerivative():
+            self.grad += (1.0 if self.data > 0.0 else alpha) * out.grad
+        out._updatePartialDerivative = _updatePartialDerivative
+
+        return out
+
     # Sigmoid linear unit activation (Sigmoid Shrinkage)
     def silu(self):
-        out = Value(self.data / (1.0 + math.exp(-self.data)), (self,))
+        out = DerivableValue(self.data / (1.0 + math.exp(-self.data)), (self,))
 
         def _updatePartialDerivative():
             self.grad += (out.data + (math.exp(-self.data) /
@@ -184,7 +198,7 @@ class DerivableValue:
 
     # Gaussian activation
     def gaussian(self):
-        out = Value(math.exp(-0.5 * (self.data ** 2.0)), (self,))
+        out = DerivableValue(math.exp(-0.5 * (self.data ** 2.0)), (self,))
 
         def _updatePartialDerivative():
             self.grad += (-self.data * math.exp(-0.5 *

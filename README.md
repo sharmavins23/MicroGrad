@@ -25,9 +25,18 @@ now supports more robust computations (that are probably All useless), such as
 logarithms, or tracking values as power exponents.
 
 Of more (relative) value, I've gone ahead and added a wide variety of activation
-functions for multi-layered perceptrons. In total, there are ten _unique_
+functions for multi-layered perceptrons. In total, there are eleven _unique_
 non-linearity functions. Ideally, these can be compared and contrasted for
-individual projects as necessary.
+individual projects as necessary. Though these activation functions could
+_potentially_ be parameterized, the architecture for micrograd does not support
+this (as it's a pain to test and implement. Simply put: I don't want to do
+that.)
+
+The neural network is structured such that layers of neurons can be configured
+and are always fully connected, thus creating multilayer perceptron neural
+networks. A network itself can have a particular activation function specified.
+I could have configured a network to allow for each node to _individually_ be
+configured for a particular activation function. However, I did not do this.
 
 # License TL;DR
 
