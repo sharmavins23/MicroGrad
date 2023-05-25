@@ -6,8 +6,28 @@ This project is a re-implementation of
 simple gradient descent engine. It's a DIY, hands-on implementation of neural
 networks from the lowest (software) level.
 
-The project itself is not only a re-implementation of this, but an extension to
-a few more "complicated" neural network examples.
+The actual MicroGrad project is redundant throughout this repository - The
+`micrograd` folder contains the implementation. This implementation of a
+multi-layer perceptron network is then copied and re-used throughout the project
+for various differing datasets. The goal is to try different things and see how
+the project performs.
+
+## MicroGrad (My Version)
+
+MicroGrad itself is an engine for consuming a particular equation (defined by
+code) and arbitrarily performing both forward and backward passes. It is the
+basis for neural networks, and effectively handles all of the derivation steps
+of backpropagation throughout a network.
+
+I've gone ahead and stripped some of the value-less additions of MicroGrad
+(namely, a lot of the labelling) in favor of cleaning up the code. The engine
+now supports more robust computations (that are probably All useless), such as
+logarithms, or tracking values as power exponents.
+
+Of more (relative) value, I've gone ahead and added a wide variety of activation
+functions for multi-layered perceptrons. In total, there are ten _unique_
+non-linearity functions. Ideally, these can be compared and contrasted for
+individual projects as necessary.
 
 # License TL;DR
 
