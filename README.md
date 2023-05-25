@@ -6,12 +6,6 @@ This project is a re-implementation of
 simple gradient descent engine. It's a DIY, hands-on implementation of neural
 networks from the lowest (software) level.
 
-The actual MicroGrad project is redundant throughout this repository - The
-`micrograd` folder contains the implementation. This implementation of a
-multi-layer perceptron network is then copied and re-used throughout the project
-for various differing datasets. The goal is to try different things and see how
-the project performs.
-
 ## MicroGrad (My Version)
 
 MicroGrad itself is an engine for consuming a particular equation (defined by
@@ -37,6 +31,29 @@ and are always fully connected, thus creating multilayer perceptron neural
 networks. A network itself can have a particular activation function specified.
 I could have configured a network to allow for each node to _individually_ be
 configured for a particular activation function. However, I did not do this.
+
+## Results (Wow)
+
+Unfortunately, MicroGrad is **horribly slow.** Go figure - Writing your own
+neural network code without any GPU support with naive Python values effectively
+backtracks you a dozen years in terms of the "big iron" of neural network
+computation.
+
+MicroGrad is also quite limiting in terms of what networks can be designed and
+created with it, which is (in and of itself) fine. However, I was still able to
+create some networks and test some interesting things.
+
+`compareMLP.py` demonstrates the difference in activation functions between
+these models. From this script we can relatively compare how the networks
+"learn." All tests are done with a neural network composed of 3 input neurons,
+10 in hidden layer 1, 5 in hidden layer 2, and finally 1 neuron in the output
+layer.
+
+![Activation Function Losses](img/activationFunctionLosses.png)
+
+Interesting results are gained through this comparison. Certain activation
+functions perform differently compared to others; This is (relatively speaking)
+intended behavior.
 
 # License TL;DR
 
